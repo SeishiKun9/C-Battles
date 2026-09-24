@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>C-Battles</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="game-shell">
+      <header class="hud">
+        <div class="title-wrap">
+          <p class="subtitle">C Programming Duel</p>
+          <h1>C-Battles</h1>
+        </div>
+        <button id="resetBtn" class="reset-btn">Reset Match</button>
+      </header>
+
+      <div id="startMenu" class="start-menu">
+        <div class="start-card">
+          <p class="menu-kicker">Choose Your Challenge</p>
+          <h2>Start Match</h2>
+
+          <div class="difficulty-row" aria-label="Difficulty selection">
+            <button class="difficulty-btn active" data-difficulty="beginner" type="button">Beginner</button>
+            <button class="difficulty-btn" data-difficulty="intermediate" type="button">Intermediate</button>
+            <button class="difficulty-btn" data-difficulty="expert" type="button">Expert</button>
+          </div>
+
+          <div class="name-grid">
+            <label>
+              <span>Player 1 Name</span>
+              <input id="player1NameInput" type="text" maxlength="16" placeholder="Player 1" />
+            </label>
+            <label>
+              <span>Player 2 Name</span>
+              <input id="player2NameInput" type="text" maxlength="16" placeholder="Player 2" />
+            </label>
+          </div>
+
+          <div class="controls-grid">
+            <label>
+              <span>Player 1 Color</span>
+              <input id="player1Color" type="color" value="#4dade8" />
+            </label>
+            <label>
+              <span>Player 2 Color</span>
+              <input id="player2Color" type="color" value="#ff5d74" />
+            </label>
+          </div>
+
+          <button id="startBtn" class="start-btn" type="button">Start Battle</button>
+        </div>
+      </div>
+
+      <main class="arena-wrap">
+        <div id="arena" class="arena" aria-label="combat arena">
+          <div id="player2Status" class="status-card status-right" aria-label="Player 2 status">
+            <div class="status-topline">
+              <span id="player2StatusName">Player 2</span>
+              <span id="player2StatusValue">100 / 100</span>
+            </div>
+            <div class="hp-box">
+              <div id="hp2" class="hp-fill enemy-fill"></div>
+            </div>
+          </div>
+
+          <div id="player1Status" class="status-card status-left" aria-label="Player 1 status">
+            <div class="status-topline">
+              <span id="player1StatusName">Player 1</span>
+              <span id="player1StatusValue">100 / 100</span>
+            </div>
+            <div class="hp-box">
+              <div id="hp1" class="hp-fill"></div>
+            </div>
+          </div>
+
+          <div id="player1" class="fighter fighter-left" aria-label="Player 1">
+            <div id="player1Name" class="fighter-name">Player 1</div>
+          </div>
+
+          <div id="player2" class="fighter fighter-right" aria-label="Player 2">
+            <div id="player2Name" class="fighter-name">Player 2</div>
+          </div>
+
+          <div class="center-line"></div>
+
+          <div id="battlePopup" class="battle-popup" aria-live="assertive"></div>
+
+          <div id="questionPanel" class="question-panel hidden" aria-live="polite">
+            <div id="turnLabel" class="turn-label">Player 1 turn</div>
+            <h2 id="questionText">Question</h2>
+            <div id="choices" class="choices"></div>
+          </div>
+
+          <div id="message" class="message-box">Choose a difficulty and enter your names to begin.</div>
+        </div>
+      </main>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
