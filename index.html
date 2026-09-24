@@ -7,6 +7,12 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <div class="desktop-only-notice" role="status">
+      <div>
+        <strong>Desktop required</strong>
+        <span>C Battle: Profession Duels needs a desktop-sized screen.</span>
+      </div>
+    </div>
     <div class="game-shell">
       <header class="hud">
         <div class="title-wrap">
@@ -43,6 +49,27 @@
             <label>
               <span>Player 2 Name</span>
               <input id="player2NameInput" type="text" maxlength="16" placeholder="Player 2" />
+            </label>
+          </div>
+
+          <div class="control-select-grid">
+            <label>
+              <span>Player 1 Controls</span>
+              <select id="player1Control">
+                <option value="wasd">WASD + F</option>
+                <option value="arrows">Arrow keys + F</option>
+                <option value="gamepad1">Controller 1</option>
+                <option value="gamepad2">Controller 2</option>
+              </select>
+            </label>
+            <label>
+              <span>Player 2 Controls</span>
+              <select id="player2Control">
+                <option value="arrows">Arrow keys + Enter</option>
+                <option value="wasd">WASD + Enter</option>
+                <option value="gamepad1">Controller 1</option>
+                <option value="gamepad2">Controller 2</option>
+              </select>
             </label>
           </div>
 
@@ -100,8 +127,8 @@
               <p class="menu-kicker">Before the duel</p>
               <h2 id="controlsTitle">Know your controls</h2>
               <div class="control-guide">
-                <div><strong>Player 1</strong><span>WASD to choose · F to confirm</span></div>
-                <div><strong>Player 2</strong><span>Arrow keys to choose · Enter to confirm</span></div>
+                <div><strong>Player 1</strong><span id="player1ControlGuide">WASD to choose - F to confirm</span></div>
+                <div><strong>Player 2</strong><span id="player2ControlGuide">Arrow keys to choose - Enter to confirm</span></div>
               </div>
               <button id="readyBtn" class="start-btn" type="button">I’m Ready</button>
             </div>

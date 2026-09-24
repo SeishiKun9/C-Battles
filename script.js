@@ -17,6 +17,8 @@ const messageBox = document.getElementById('message');
 const battlePopup = document.getElementById('battlePopup');
 const controlsPopup = document.getElementById('controlsPopup');
 const readyBtn = document.getElementById('readyBtn');
+const player1ControlGuide = document.getElementById('player1ControlGuide');
+const player2ControlGuide = document.getElementById('player2ControlGuide');
 const resetBtn = document.getElementById('resetBtn');
 const startMenu = document.getElementById('startMenu');
 const startBtn = document.getElementById('startBtn');
@@ -24,6 +26,8 @@ const player1NameInput = document.getElementById('player1NameInput');
 const player2NameInput = document.getElementById('player2NameInput');
 const player1ColorInput = document.getElementById('player1Color');
 const player2ColorInput = document.getElementById('player2Color');
+const player1ControlInput = document.getElementById('player1Control');
+const player2ControlInput = document.getElementById('player2Control');
 const difficultyButtons = document.querySelectorAll('.difficulty-btn');
 const subjectButtons = document.querySelectorAll('.subject-btn');
 
@@ -83,6 +87,8 @@ const state = {
   started: false,
   difficulty: 'beginner',
   subject: 'c',
+  controls: { 1: 'wasd', 2: 'arrows' },
+  gamepadButtons: { 1: {}, 2: {} },
   selectedIndex: { 1: 0, 2: 0 },
   answeredPlayers: new Set(),
   roundId: 0,
@@ -293,30 +299,30 @@ function handleKeyDown(event) {
   if (!state.started || state.controlsOpen) return;
 
   if (state.questionReady) {
-    const p1Moves = { w: -2, a: -1 };
-    const p2Moves = { ArrowUp: -2, ArrowLeft: -1 };
-    const p1MovesDown = { s: 2, d: 1 };
-    const p2MovesDown = { ArrowDown: 2, ArrowRight: 1 };
-    const move = p1Moves[event.key] ?? p2Moves[event.key];
-    const moveDown = p1MovesDown[event.key] ?? p2MovesDown[event.key];
-    const playerNumber = event.key in p1Moves || event.key in p1MovesDown ? 1 : 2;
+    const p1Moves = state.controls[1] === 'wasd' ? { w: -2, a: -1 } : { ArrowUp: -2, ArrowLeft: -1 };
+    const p2Moves = state.controls[2] === 'wasd' ? { w: -2, a: -1 } : { ArrowUp: -2, ArrowLeft: -1 };
+    const p1MovesDown = state.controls[1] === 'wasd' ? { s: 2, d: 1 } : { ArrowDown: 2, ArrowRight: 1 };
+    const p2MovesDown = state.controls[2] === 'wasd' ? { s: 2, d: 1 } : { ArrowDown: 2, ArrowRight: 1 };
+    const p1Move = p1Moves[event.key] ?? p1MovesDown[event.key];
+    const p2Move = p2Moves[event.key] ?? p2MovesDown[event.key];
+    const playerNumber = p1Move !== undefined ? 1 : 2;
+    const move = playerNumber === 1 ? p1Move : p2Move;
 
-    if ((move !== undefined || moveDown !== undefined) && !state.answeredPlayers.has(playerNumber)) {
+    if (move !== undefined && !state.answeredPlayers.has(playerNumber)) {
       event.preventDefault();
-      const delta = move ?? moveDown;
       const current = state.selectedIndex[playerNumber];
-      state.selectedIndex[playerNumber] = clamp(current + delta, 0, state.question.options.length - 1);
+      state.selectedIndex[playerNumber] = clamp(current + move, 0, state.question.options.length - 1);
       updateAnswerSelection();
       return;
     }
 
-    if (event.key.toLowerCase() === 'f') {
+    if (event.key.toLowerCase() === 'f' && !state.controls[1].startsWith('gamepad')) {
       event.preventDefault();
       handleAnswer(1);
       return;
     }
 
-    if (event.key === 'Enter') {
+    if (event.key === 'Enter' && !state.controls[2].startsWith('gamepad')) {
       event.preventDefault();
       handleAnswer(2);
     }
@@ -332,6 +338,12 @@ function updateStartButtonState() {
   startBtn.style.cursor = ready ? 'pointer' : 'not-allowed';
 }
 
+function isConfiguredKeyboardKey(key) {
+  const p1Keyboard = state.controls[1] === 'wasd' ? ['w', 'a', 's', 'd'] : state.controls[1] === 'arrows' ? ['ArrowUp', 'ArrowLeft', 'ArrowDown', 'ArrowRight'] : [];
+  const p2Keyboard = state.controls[2] === 'wasd' ? ['w', 'a', 's', 'd'] : state.controls[2] === 'arrows' ? ['ArrowUp', 'ArrowLeft', 'ArrowDown', 'ArrowRight'] : [];
+  return p1Keyboard.includes(key) || p2Keyboard.includes(key);
+}
+
 function setupKeyboard() {
   window.addEventListener('keydown', (event) => {
     const key = event.key;
@@ -345,11 +357,11 @@ function setupKeyboard() {
       return;
     }
 
-    if (state.questionReady && (key in state.keys)) {
+    if (state.questionReady && isConfiguredKeyboardKey(key)) {
       return;
     }
 
-    if (key in state.keys) {
+    if (isConfiguredKeyboardKey(key)) {
       state.keys[key] = true;
       event.preventDefault();
     }
@@ -361,19 +373,63 @@ function setupKeyboard() {
       return;
     }
 
-    if (key in state.keys) {
+    if (isConfiguredKeyboardKey(key)) {
       state.keys[key] = false;
     }
   });
 }
 
-function tick() {
-  const p1Vertical = (state.keys.w ? -1 : 0) + (state.keys.s ? 1 : 0);
-  const p1Horizontal = (state.keys.a ? -1 : 0) + (state.keys.d ? 1 : 0);
-  const p2Vertical = (state.keys.ArrowUp ? -1 : 0) + (state.keys.ArrowDown ? 1 : 0);
-  const p2Horizontal = (state.keys.ArrowLeft ? -1 : 0) + (state.keys.ArrowRight ? 1 : 0);
+function getGamepadInput(playerNumber) {
+  const control = state.controls[playerNumber];
+  if (!control.startsWith('gamepad')) return null;
 
-  if (state.started) {
+  const gamepadIndex = control === 'gamepad1' ? 0 : 1;
+  const gamepads = navigator.getGamepads?.() || [];
+  const gamepad = gamepads[gamepadIndex];
+  if (!gamepad) return null;
+
+  const axisX = gamepad.axes[0] || 0;
+  const axisY = gamepad.axes[1] || 0;
+  const direction = Math.abs(axisX) > Math.abs(axisY)
+    ? (axisX < -0.45 ? -1 : axisX > 0.45 ? 1 : 0)
+    : (axisY < -0.45 ? -2 : axisY > 0.45 ? 2 : 0);
+  const previousDirection = state.gamepadButtons[playerNumber].direction || 0;
+  state.gamepadButtons[playerNumber].direction = direction;
+
+  return {
+    horizontal: Math.abs(axisX) > 0.25 ? axisX : 0,
+    vertical: Math.abs(axisY) > 0.25 ? axisY : 0,
+    direction: direction !== 0 && direction !== previousDirection ? direction : 0,
+    confirm: !!gamepad.buttons[0]?.pressed && !state.gamepadButtons[playerNumber].confirm,
+    confirmHeld: !!gamepad.buttons[0]?.pressed,
+  };
+}
+
+function tick() {
+  const p1Gamepad = getGamepadInput(1);
+  const p2Gamepad = getGamepadInput(2);
+  const p1Keyboard = state.controls[1] === 'wasd';
+  const p2Keyboard = state.controls[2] === 'arrows';
+  const p1Vertical = p1Gamepad ? p1Gamepad.vertical : p1Keyboard ? (state.keys.w ? -1 : 0) + (state.keys.s ? 1 : 0) : 0;
+  const p1Horizontal = p1Gamepad ? p1Gamepad.horizontal : p1Keyboard ? (state.keys.a ? -1 : 0) + (state.keys.d ? 1 : 0) : 0;
+  const p2Vertical = p2Gamepad ? p2Gamepad.vertical : p2Keyboard ? (state.keys.ArrowUp ? -1 : 0) + (state.keys.ArrowDown ? 1 : 0) : 0;
+  const p2Horizontal = p2Gamepad ? p2Gamepad.horizontal : p2Keyboard ? (state.keys.ArrowLeft ? -1 : 0) + (state.keys.ArrowRight ? 1 : 0) : 0;
+
+  if (state.questionReady) {
+    [[1, p1Gamepad], [2, p2Gamepad]].forEach(([playerNumber, gamepad]) => {
+      if (!gamepad || state.answeredPlayers.has(playerNumber)) return;
+      if (gamepad.direction !== 0) {
+        state.selectedIndex[playerNumber] = clamp(state.selectedIndex[playerNumber] + gamepad.direction, 0, state.question.options.length - 1);
+        updateAnswerSelection();
+      }
+      if (gamepad.confirm) handleAnswer(playerNumber);
+    });
+  }
+
+  state.gamepadButtons[1].confirm = !!p1Gamepad?.confirmHeld;
+  state.gamepadButtons[2].confirm = !!p2Gamepad?.confirmHeld;
+
+  if (state.started && !state.questionReady && !state.controlsOpen) {
     state.player1.x = clamp(state.player1.x + p1Horizontal * 4.5, 60, 920);
     state.player1.y = clamp(state.player1.y + p1Vertical * 4.5, 80, 460);
     state.player2.x = clamp(state.player2.x + p2Horizontal * 4.5, 60, 920);
@@ -412,6 +468,9 @@ function startBattle() {
 
   state.started = true;
   state.roundId += 1;
+  state.controls[1] = player1ControlInput.value;
+  state.controls[2] = player2ControlInput.value;
+  state.gamepadButtons = { 1: {}, 2: {} };
   state.player1.name = p1Name;
   state.player2.name = p2Name;
   state.player1.color = player1ColorInput.value;
@@ -438,6 +497,13 @@ function beginQuestionRound() {
   if (!state.started || !state.controlsOpen) return;
   state.controlsOpen = false;
   controlsPopup.classList.remove('show');
+  const controlGuide = (control, confirmKey) => control === 'wasd'
+    ? `WASD to choose - ${confirmKey} to confirm`
+    : control === 'arrows'
+      ? `Arrow keys to choose - ${confirmKey} to confirm`
+      : `${control === 'gamepad1' ? 'Controller 1' : 'Controller 2'} stick or D-pad - button A to confirm`;
+  player1ControlGuide.textContent = controlGuide(state.controls[1], 'F');
+  player2ControlGuide.textContent = controlGuide(state.controls[2], 'Enter');
   showMessage('Use the controls to select an answer and confirm it.');
   renderQuestion();
 }
@@ -452,6 +518,9 @@ function resetGame() {
   state.selectedIndex = { 1: 0, 2: 0 };
   state.answeredPlayers = new Set();
   state.controlsOpen = false;
+  state.controls[1] = player1ControlInput.value || 'wasd';
+  state.controls[2] = player2ControlInput.value || 'arrows';
+  state.gamepadButtons = { 1: {}, 2: {} };
   state.roundId += 1;
   Object.keys(state.keys).forEach((key) => {
     state.keys[key] = false;
