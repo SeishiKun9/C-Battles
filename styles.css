@@ -96,6 +96,31 @@ body {
   border-color: rgba(166, 219, 255, 0.8);
 }
 
+.subject-row {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.45rem;
+  margin-bottom: 1.2rem;
+}
+
+.subject-btn {
+  min-height: 3rem;
+  border: 1px solid rgba(158, 205, 255, 0.3);
+  border-radius: 10px;
+  background: rgba(17, 39, 52, 0.9);
+  color: var(--muted);
+  padding: 0.55rem 0.35rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.subject-btn.active {
+  background: rgba(39, 110, 170, 0.95);
+  border-color: rgba(166, 219, 255, 0.8);
+  color: var(--text);
+}
+
 .name-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(150px, 1fr));
@@ -558,5 +583,9 @@ h1 {
   .hud {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .subject-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

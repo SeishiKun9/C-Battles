@@ -25,6 +25,7 @@ const player2NameInput = document.getElementById('player2NameInput');
 const player1ColorInput = document.getElementById('player1Color');
 const player2ColorInput = document.getElementById('player2Color');
 const difficultyButtons = document.querySelectorAll('.difficulty-btn');
+const subjectButtons = document.querySelectorAll('.subject-btn');
 
 const difficultyConfig = {
   beginner: { hp: 120, damageMultiplier: 0.8 },
@@ -32,7 +33,8 @@ const difficultyConfig = {
   expert: { hp: 90, damageMultiplier: 1.3 },
 };
 
-const questions = [
+const questionBanks = {
+  c: [
   { question: 'Which keyword is used to define a constant in C?', options: ['const', 'static', 'final', 'volatile'], answer: 0, damage: 12 },
   { question: 'What does the % operator do in C?', options: ['Divides and rounds down', 'Returns the remainder', 'Multiplies values', 'Compares values'], answer: 1, damage: 14 },
   { question: 'Which symbol is used for a single-line comment in C?', options: ['//', '#', '/*', '--'], answer: 0, damage: 18 },
@@ -41,7 +43,36 @@ const questions = [
   { question: 'Which loop is best when the number of iterations is known?', options: ['for', 'while', 'do while', 'goto'], answer: 0, damage: 30 },
   { question: 'Which type is used to store a single character in C?', options: ['char', 'string', 'text', 'byte'], answer: 0, damage: 32 },
   { question: 'What does * do when used in a variable declaration?', options: ['Adds a value', 'Creates a pointer', 'Multiplies the variable', 'Stops the program'], answer: 1, damage: 38 },
-];
+  ],
+  psychology: [
+    { question: 'Which part of the brain is strongly associated with memory formation?', options: ['Hippocampus', 'Medulla', 'Cerebellum', 'Occipital lobe'], answer: 0, damage: 12 },
+    { question: 'Classical conditioning is most associated with which psychologist?', options: ['Ivan Pavlov', 'Jean Piaget', 'Carl Rogers', 'Abraham Maslow'], answer: 0, damage: 16 },
+    { question: 'What is confirmation bias?', options: ['Favoring evidence that supports existing beliefs', 'Forgetting a learned skill', 'Fear of social situations', 'Learning through rewards only'], answer: 0, damage: 20 },
+    { question: 'Which theory describes a hierarchy of human needs?', options: ['Maslow\'s hierarchy', 'Drive reduction theory', 'Attachment theory', 'Two-factor theory'], answer: 0, damage: 24 },
+    { question: 'What does empathy involve?', options: ['Understanding another person\'s perspective', 'Avoiding all emotions', 'Controlling another person', 'Ignoring social cues'], answer: 0, damage: 28 },
+  ],
+  accountancy: [
+    { question: 'What is the basic accounting equation?', options: ['Assets = Liabilities + Equity', 'Assets = Revenue - Expenses', 'Equity = Assets + Liabilities', 'Profit = Assets + Capital'], answer: 0, damage: 12 },
+    { question: 'Which account normally has a debit balance?', options: ['Asset', 'Revenue', 'Capital', 'Liability'], answer: 0, damage: 16 },
+    { question: 'What is depreciation?', options: ['Allocation of an asset\'s cost over its useful life', 'An increase in cash', 'A business loan', 'A type of revenue'], answer: 0, damage: 20 },
+    { question: 'Which statement reports revenue and expenses?', options: ['Income statement', 'Balance sheet', 'Cash book', 'Bank statement'], answer: 0, damage: 24 },
+    { question: 'A trial balance is mainly used to check what?', options: ['Equality of debits and credits', 'The market price of stock', 'Employee attendance', 'Customer satisfaction'], answer: 0, damage: 28 },
+  ],
+  criminology: [
+    { question: 'What does criminology study?', options: ['Crime, criminals, and society\'s response', 'Only courtroom procedure', 'Weather patterns', 'Business profits'], answer: 0, damage: 12 },
+    { question: 'What is the dark figure of crime?', options: ['Crime that is not reported or recorded', 'Violent crime at night', 'Crime committed in darkness', 'A criminal profile'], answer: 0, damage: 16 },
+    { question: 'Routine activity theory focuses on motivated offenders, suitable targets, and what?', options: ['Lack of capable guardianship', 'Prison overcrowding', 'Media coverage', 'Physical strength'], answer: 0, damage: 20 },
+    { question: 'What is recidivism?', options: ['Reoffending after punishment or rehabilitation', 'Reporting a crime', 'Witness protection', 'Crime prevention by design'], answer: 0, damage: 24 },
+    { question: 'Which approach emphasizes repairing harm to victims and communities?', options: ['Restorative justice', 'Retributive justice', 'Deterrence theory', 'Classical conditioning'], answer: 0, damage: 28 },
+  ],
+  tourism: [
+    { question: 'What is sustainable tourism?', options: ['Tourism that limits harm and supports future needs', 'Tourism only for wealthy travelers', 'Travel without local guides', 'Tourism during one season'], answer: 0, damage: 12 },
+    { question: 'What is a destination?', options: ['A place visited by travelers', 'A travel document', 'A hotel room type', 'An airline employee'], answer: 0, damage: 16 },
+    { question: 'Which sector provides accommodation for visitors?', options: ['Hospitality', 'Agriculture', 'Manufacturing', 'Telecommunications'], answer: 0, damage: 20 },
+    { question: 'What is ecotourism primarily focused on?', options: ['Responsible travel in natural areas', 'Large-scale shopping trips', 'Business conferences only', 'Theme park rides'], answer: 0, damage: 24 },
+    { question: 'What is cultural tourism?', options: ['Travel to experience culture and heritage', 'Travel only for medical care', 'Travel without meeting locals', 'Travel limited to airports'], answer: 0, damage: 28 },
+  ],
+};
 
 const state = {
   player1: { name: 'Player 1', x: 170, y: 270, hp: 100, color: '#4dade8' },
@@ -51,6 +82,7 @@ const state = {
   questionReady: false,
   started: false,
   difficulty: 'beginner',
+  subject: 'c',
   selectedIndex: { 1: 0, 2: 0 },
   answeredPlayers: new Set(),
   roundId: 0,
@@ -114,6 +146,7 @@ function showBattlePopup(playerNumber) {
 }
 
 function getNextQuestion() {
+  const questions = questionBanks[state.subject];
   const randomIndex = Math.floor(Math.random() * questions.length);
   return questions[randomIndex];
 }
@@ -359,6 +392,13 @@ function setDifficulty(level) {
   updateStartButtonState();
 }
 
+function setSubject(subject) {
+  state.subject = subject;
+  subjectButtons.forEach((button) => {
+    button.classList.toggle('active', button.dataset.subject === subject);
+  });
+}
+
 function startBattle() {
   const p1Name = player1NameInput.value.trim();
   const p2Name = player2NameInput.value.trim();
@@ -433,6 +473,10 @@ player2NameInput.addEventListener('input', updateStartButtonState);
 
 difficultyButtons.forEach((button) => {
   button.addEventListener('click', () => setDifficulty(button.dataset.difficulty));
+});
+
+subjectButtons.forEach((button) => {
+  button.addEventListener('click', () => setSubject(button.dataset.subject));
 });
 
 setupKeyboard();
