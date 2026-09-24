@@ -236,6 +236,52 @@ h1 {
   100% { opacity: 0; transform: translate(-50%, -12px) scale(0.96); }
 }
 
+.controls-popup {
+  position: absolute;
+  inset: 0;
+  display: none;
+  place-items: center;
+  z-index: 15;
+  background: rgba(3, 10, 17, 0.68);
+  backdrop-filter: blur(5px);
+}
+
+.controls-popup.show {
+  display: grid;
+}
+
+.controls-popup-card {
+  width: min(430px, 86%);
+  padding: 1.35rem;
+  border: 1px solid rgba(130, 185, 239, 0.55);
+  border-radius: 18px;
+  background: rgba(11, 23, 32, 0.98);
+  box-shadow: 0 24px 55px rgba(0, 0, 0, 0.42);
+}
+
+.controls-popup-card h2 {
+  margin: 0.35rem 0 1rem;
+}
+
+.control-guide {
+  display: grid;
+  gap: 0.65rem;
+  margin-bottom: 1.1rem;
+}
+
+.control-guide div {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.75rem 0.85rem;
+  border-left: 3px solid var(--gold);
+  background: rgba(22, 43, 57, 0.76);
+}
+
+.control-guide span {
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
 .status-card {
   position: absolute;
   top: 18px;
@@ -336,6 +382,14 @@ h1 {
   transform: translateY(-52px);
 }
 
+.question-active .fighter-name {
+  visibility: hidden;
+}
+
+.question-active .fighter::before {
+  visibility: hidden;
+}
+
 .hp-box {
   width: 100%;
   height: 18px;
@@ -384,6 +438,10 @@ h1 {
   font-size: 0.8rem;
   letter-spacing: 0.16rem;
   text-transform: uppercase;
+}
+
+.turn-label:empty {
+  display: none;
 }
 
 #questionText {

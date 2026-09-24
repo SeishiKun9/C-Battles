@@ -87,6 +87,18 @@
 
           <div id="battlePopup" class="battle-popup" aria-live="assertive"></div>
 
+          <div id="controlsPopup" class="controls-popup" role="dialog" aria-modal="true" aria-labelledby="controlsTitle">
+            <div class="controls-popup-card">
+              <p class="menu-kicker">Before the duel</p>
+              <h2 id="controlsTitle">Know your controls</h2>
+              <div class="control-guide">
+                <div><strong>Player 1</strong><span>WASD to choose · F to confirm</span></div>
+                <div><strong>Player 2</strong><span>Arrow keys to choose · Enter to confirm</span></div>
+              </div>
+              <button id="readyBtn" class="start-btn" type="button">I’m Ready</button>
+            </div>
+          </div>
+
           <div id="questionPanel" class="question-panel hidden" aria-live="polite">
             <div id="turnLabel" class="turn-label">Player 1 turn</div>
             <h2 id="questionText">Question</h2>

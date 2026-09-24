@@ -15,6 +15,8 @@ const questionText = document.getElementById('questionText');
 const choicesContainer = document.getElementById('choices');
 const messageBox = document.getElementById('message');
 const battlePopup = document.getElementById('battlePopup');
+const controlsPopup = document.getElementById('controlsPopup');
+const readyBtn = document.getElementById('readyBtn');
 const resetBtn = document.getElementById('resetBtn');
 const startMenu = document.getElementById('startMenu');
 const startBtn = document.getElementById('startBtn');
@@ -52,6 +54,7 @@ const state = {
   selectedIndex: { 1: 0, 2: 0 },
   answeredPlayers: new Set(),
   roundId: 0,
+  controlsOpen: false,
   keys: {
     w: false,
     a: false,
@@ -130,9 +133,10 @@ function renderQuestion() {
   state.selectedIndex = { 1: 0, 2: 0 };
   state.answeredPlayers = new Set();
   questionPanel.classList.remove('hidden');
+  arena.classList.add('question-active');
   state.questionReady = true;
 
-  turnLabel.textContent = 'Race to answer: Player 1 uses WASD, Player 2 uses Arrow keys';
+  turnLabel.textContent = '';
   questionText.textContent = state.question.question;
   choicesContainer.innerHTML = '';
 
@@ -247,12 +251,13 @@ function handleAnswer(playerNumber) {
     if (!state.started || state.roundId !== roundId) return;
     state.activePlayer = state.activePlayer === 1 ? 2 : 1;
     questionPanel.classList.add('hidden');
+    arena.classList.remove('question-active');
     renderQuestion();
   }, 1100);
 }
 
 function handleKeyDown(event) {
-  if (!state.started) return;
+  if (!state.started || state.controlsOpen) return;
 
   if (state.questionReady) {
     const p1Moves = { w: -2, a: -1 };
@@ -299,7 +304,7 @@ function setupKeyboard() {
     const key = event.key;
     const isTextInput = document.activeElement && ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName);
 
-    if (!state.started) {
+    if (!state.started || state.controlsOpen) {
       return;
     }
 
@@ -319,7 +324,7 @@ function setupKeyboard() {
 
   window.addEventListener('keyup', (event) => {
     const key = event.key;
-    if (!state.started) {
+    if (!state.started || state.controlsOpen) {
       return;
     }
 
@@ -380,11 +385,20 @@ function startBattle() {
   state.activePlayer = 1;
   state.question = null;
   state.questionReady = false;
+  state.controlsOpen = true;
 
   startMenu.classList.add('hidden');
-  showMessage('Use the arrow keys to select an answer, then confirm with F or Enter.');
+  showMessage('Review the controls, then press I’m Ready to begin.');
   questionPanel.classList.add('hidden');
+  controlsPopup.classList.add('show');
   updateFighterVisuals();
+}
+
+function beginQuestionRound() {
+  if (!state.started || !state.controlsOpen) return;
+  state.controlsOpen = false;
+  controlsPopup.classList.remove('show');
+  showMessage('Use the controls to select an answer and confirm it.');
   renderQuestion();
 }
 
@@ -397,18 +411,22 @@ function resetGame() {
   state.questionReady = false;
   state.selectedIndex = { 1: 0, 2: 0 };
   state.answeredPlayers = new Set();
+  state.controlsOpen = false;
   state.roundId += 1;
   Object.keys(state.keys).forEach((key) => {
     state.keys[key] = false;
   });
   showMessage('Choose a difficulty and enter your names to begin.');
   questionPanel.classList.add('hidden');
+  arena.classList.remove('question-active');
+  controlsPopup.classList.remove('show');
   startMenu.classList.remove('hidden');
   updateFighterVisuals();
 }
 
 resetBtn.addEventListener('click', resetGame);
 startBtn.addEventListener('click', startBattle);
+readyBtn.addEventListener('click', beginQuestionRound);
 window.addEventListener('keydown', handleKeyDown);
 player1NameInput.addEventListener('input', updateStartButtonState);
 player2NameInput.addEventListener('input', updateStartButtonState);
